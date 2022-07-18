@@ -1,4 +1,4 @@
-// import PropTypes from 'prop-types';
+import PropTypes from 'prop-types';
 import { ImageGalleryItemBox, ImageGalleryItemLi, ImageGalleryItemImage } from './ImageGalleryItem.styled';
 
 const ImageGalleryItem = ({ serchImages, onImageClick }) => {
@@ -12,7 +12,8 @@ const ImageGalleryItem = ({ serchImages, onImageClick }) => {
 };
 
 ImageGalleryItem.protoTypes = {
-
+    serchImages: PropTypes.array.isRequired,
+    onImageClick: PropTypes.func.isRequired,
 };
 
 export default ImageGalleryItem;

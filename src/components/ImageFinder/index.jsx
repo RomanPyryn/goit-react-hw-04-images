@@ -26,16 +26,13 @@ class ImageFinder extends Component {
             imageApi.fetchImage(this.state.request, this.state.page)
                 .then(image => this.setState(state => ({ images: [...state.images, ...image.hits], status: 'resolved' })))
                 .catch(error => this.setState({error, status: 'rejected'}))
-        }
-
-        console.log('array', this.state.images);        
+        }        
     }
 
     handleSubmit = (e) => {
         e.preventDefault();
         const form = e.currentTarget;
         const request = form.elements.serch.value;
-        console.log(request);
 
         if (request.trim() === '') {
             return toast.error('Write something!');
@@ -53,7 +50,6 @@ class ImageFinder extends Component {
     }
 
     getImageUrl = e => {
-        console.log(e.currentTarget.name);
         this.setState(({
             modalImg: e.currentTarget.name,
             showModal: true,
@@ -92,8 +88,8 @@ class ImageFinder extends Component {
 
         return <div>
                 <Searchbar onSubmitFom={this.handleSubmit} />
-                {this.state.status === 'pending' && <Bars height="100" width="100" color='skyblue' ariaLabel='loading' justify-content = 'center' />}
-                {this.state.status === 'rejected' && <h1>{this.state.error.message}</h1>}
+                {this.state.status === 'pending' && <Bars height="100" width="100" color='skyblue' ariaLabel='loading'/>}
+                {this.state.status === 'rejected'  && <h1>{this.state.error.message}</h1>}
                 <ImageGallery onImageClick={this.getImageUrl} serchImages={this.state.images} />
                 {this.state.images.length > 0 && <Button onClick={this.loadMore} />}
                 {this.state.showModal && <Modal onClose={this.toggleModal} imageUrl={this.state.modalImg} />}</div>
