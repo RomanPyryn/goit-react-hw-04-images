@@ -1,8 +1,8 @@
 import { Component } from "react";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { Bars } from 'react-loader-spinner'
 import Searchbar from "./Searchbar";
+import Loader from "./Loader";
 import ImageGallery from "./ImageGallery";
 import Button from "./Button";
 import Modal from "./Modal";
@@ -23,9 +23,15 @@ class ImageFinder extends Component {
         if (prevState.request !== this.state.request || prevState.page !== this.state.page) {
             this.setState({ status: 'pending'})
             
-            imageApi.fetchImage(this.state.request, this.state.page)
+            if(prevState.request !== this.state.request) {
+                imageApi.fetchImage(this.state.request, this.state.page)
+                .then(image => this.setState(state => ({ images: [ ...image.hits], status: 'resolved' })))
+                .catch(error => this.setState({ error, status: 'rejected' }))
+            } else {
+                imageApi.fetchImage(this.state.request, this.state.page)
                 .then(image => this.setState(state => ({ images: [...state.images, ...image.hits], status: 'resolved' })))
-                .catch(error => this.setState({error, status: 'rejected'}))
+                .catch(error => this.setState({ error, status: 'rejected' }))
+            }
         }        
     }
 
@@ -40,7 +46,7 @@ class ImageFinder extends Component {
         this.setState(({
             request,
             page: 1,
-            
+            images: [],
         }));
         form.reset();
     }
@@ -88,7 +94,7 @@ class ImageFinder extends Component {
 
         return <div>
                 <Searchbar onSubmitFom={this.handleSubmit} />
-                {this.state.status === 'pending' && <Bars height="100" width="100" color='skyblue' ariaLabel='loading'/>}
+                {this.state.status === 'pending' && <Loader/> }
                 {this.state.status === 'rejected'  && <h1>{this.state.error.message}</h1>}
                 <ImageGallery onImageClick={this.getImageUrl} serchImages={this.state.images} />
                 {this.state.images.length > 0 && <Button onClick={this.loadMore} />}
