@@ -43,6 +43,7 @@ class ImageFinder extends Component {
         if (request.trim() === '') {
             return toast.error('Write something!');
         }
+        
         this.setState(({
             request,
             page: 1,
