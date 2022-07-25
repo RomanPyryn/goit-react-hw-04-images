@@ -1,4 +1,4 @@
-import { Component } from "react";
+import { useState, useEffect } from "react";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Searchbar from "./Searchbar";
@@ -8,99 +8,75 @@ import Button from "./Button";
 import Modal from "./Modal";
 import imageApi from "../../services/image-api"
 
-class ImageFinder extends Component {
-    state = {
-        request: '',
-        images: [],
-        page: 1,
-        showModal: false,
-        modalImg: '',
-        error: null,
-        status: 'idle',
-    }
+export default function ImageFinder() {
+    const [request, setRequest] = useState('');
+    const [images, setImages] = useState([]);
+    const [page, setPage] = useState(1);
+    const [showModal, setShowModal] = useState(false);
+    const [modalImg, setModalImg] = useState('');
+    const [error, setError] = useState(null);
+    const [status, setStatus] = useState('idle');
+    
+    useEffect(() => {
+        if (!request) {
+            return;
+        };
 
-    componentDidUpdate(_, prevState) {
-        if (prevState.request !== this.state.request || prevState.page !== this.state.page) {
-            this.setState({ status: 'pending'})
-            
-            if(prevState.request !== this.state.request) {
-                imageApi.fetchImage(this.state.request, this.state.page)
-                .then(image => this.setState(state => ({ images: [ ...image.hits], status: 'resolved' })))
-                .catch(error => this.setState({ error, status: 'rejected' }))
-            } else {
-                imageApi.fetchImage(this.state.request, this.state.page)
-                .then(image => this.setState(state => ({ images: [...state.images, ...image.hits], status: 'resolved' })))
-                .catch(error => this.setState({ error, status: 'rejected' }))
-            }
-        }        
-    }
+        setStatus('pending');
 
-    handleSubmit = (e) => {
+        if (page === 1) {
+            imageApi.fetchImage(request, page)
+            .then(image => {
+                console.log(image.hits)
+                setImages([...image.hits]);
+                setStatus('resolved')
+            })
+            .catch(error => {
+                setError(error);
+                setStatus('rejected')
+            })
+        } else {
+            imageApi.fetchImage(request, page)
+            .then(image => {
+                setImages([...images, ...image.hits]);
+                setStatus('resolved')
+            })
+            .catch(error => {
+                setError(error);
+                setStatus('rejected')
+            })
+        }
+    }, [images, page, request]);
+    
+
+    const handleSubmit = (e) => {
         e.preventDefault();
-        const form = e.currentTarget;
-        const request = form.elements.serch.value;
+        const formRequest = e.currentTarget.elements.serch.value;
 
-        if (request.trim() === '') {
+        if (formRequest.trim() === '') {
             return toast.error('Write something!');
         }
-        
-        this.setState(({
-            request,
-            page: 1,
-            images: [],
-        }));
-        form.reset();
+
+        setRequest(formRequest);
+        setPage(1);
+        setImages([]);
+
+        e.currentTarget.reset();
+    };
+
+    const getImageUrl = e => {
+        setModalImg(e.currentTarget.name);
+        setShowModal(true);
     }
 
-    loadMore = () => {
-        this.setState(prevState => ({ page: prevState.page + 1}))
-    }
-
-    getImageUrl = e => {
-        this.setState(({
-            modalImg: e.currentTarget.name,
-            showModal: true,
-        }));
-    }
-
-    toggleModal = () => {
-        this.setState(({ showModal }) => ({showModal: !showModal}))
-    }
-
-    render() {
-        // if (this.state.status === 'idle') {
-        //     return <Searchbar onSubmitFom={this.handleSubmit} />
-        // }
-
-        // if (this.state.status === 'pending') {
-        //     return <div>
-        //         <Searchbar onSubmitFom={this.handleSubmit} />
-        //         <Bars height="100" width="100" color='skyblue' ariaLabel='loading' /></div>
-        // }
-
-        // if (this.state.status === 'rejected') {
-        //     return <div>
-        //         <Searchbar onSubmitFom={this.handleSubmit} />
-        //         <h1>{this.state.error.message}</h1></div>
-            
-        // }
-
-        // if (this.state.status === 'resolved') {
-        //     return <div>
-        //         <Searchbar onSubmitFom={this.handleSubmit} />
-        //         <ImageGallery onImageClick={this.getImageUrl} serchImages={this.state.images} />
-        //         <Button onClick={this.loadMore} />
-        //         <Modal onClose={this.toggleModal} imageUrl={this.state.modalImg} /></div>
-        // }
-
-        return <div>
-                <Searchbar onSubmitFom={this.handleSubmit} />
-                {this.state.status === 'pending' && <Loader/> }
-                {this.state.status === 'rejected'  && <h1>{this.state.error.message}</h1>}
-                <ImageGallery onImageClick={this.getImageUrl} serchImages={this.state.images} />
-                {this.state.images.length > 0 && <Button onClick={this.loadMore} />}
-                {this.state.showModal && <Modal onClose={this.toggleModal} imageUrl={this.state.modalImg} />}</div>
-    }
-}
-
-export default ImageFinder;
+    return (
+        <div>
+            <Searchbar onSubmitFom={handleSubmit} />
+            {status === 'pending' && <Loader/> }
+            {status === 'rejected'  && <h1>{error.message}</h1>}
+            <ImageGallery onImageClick={getImageUrl} serchImages={images} />
+            {images.length > 0 && <Button onClick={setPage(prevPage => prevPage + 1)} />}
+            {showModal && <Modal onClose={setShowModal(!showModal)} imageUrl={modalImg} />}
+        </div>
+    );
+};
