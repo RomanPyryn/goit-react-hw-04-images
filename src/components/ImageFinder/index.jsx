@@ -54,9 +54,14 @@ export default function ImageFinder() {
         e.currentTarget.reset();
     };
 
+    const toggleModal = () => {
+        console.log('Toggle');
+        setShowModal(!showModal);
+    };
+
     const getImageUrl = e => {
         setModalImg(e.currentTarget.name);
-        setShowModal(!showModal);
+        toggleModal();
     }
 
      const loadMore = () => {
@@ -70,7 +75,7 @@ export default function ImageFinder() {
             {status === 'rejected'  && <h1>{error.message}</h1>}
             <ImageGallery onImageClick={getImageUrl} serchImages={images} />
             {images.length > 0 && <Button onClick={loadMore} />}
-            {showModal && <Modal onClose={setShowModal(!showModal)} imageUrl={modalImg}><img src={modalImg} alt={modalImg}/></Modal>}
+            {showModal && <Modal onClose={toggleModal}><img src={modalImg} alt={modalImg}/></Modal>}
         </div>
     );
 };
