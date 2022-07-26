@@ -16,37 +16,27 @@ export default function ImageFinder() {
     const [modalImg, setModalImg] = useState('');
     const [error, setError] = useState(null);
     const [status, setStatus] = useState('idle');
-    
+
     useEffect(() => {
-        if (!request) {
-            return;
+        const fetchFunc = async (request, page) => {
+
+            setStatus('pending');
+
+            try {
+                const results = await imageApi.fetchImage(request, page)
+                console.log(results.hits)
+                setImages([...images, ...results.hits]);
+                setStatus('resolved')
+            } catch (error) {
+                setError(error);
+                toast.error('Write something else!');
+                setStatus('rejected')
+            }
         };
-
-        setStatus('pending');
-
-        if (page === 1) {
-            imageApi.fetchImage(request, page)
-            .then(image => {
-                console.log(image.hits)
-                setImages([...image.hits]);
-                setStatus('resolved')
-            })
-            .catch(error => {
-                setError(error);
-                setStatus('rejected')
-            })
-        } else {
-            imageApi.fetchImage(request, page)
-            .then(image => {
-                setImages([...images, ...image.hits]);
-                setStatus('resolved')
-            })
-            .catch(error => {
-                setError(error);
-                setStatus('rejected')
-            })
-        }
-    }, [images, page, request]);
+        
+        if (request !== '') {fetchFunc(request, page);}       
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [page, request]);
     
 
     const handleSubmit = (e) => {
@@ -66,7 +56,11 @@ export default function ImageFinder() {
 
     const getImageUrl = e => {
         setModalImg(e.currentTarget.name);
-        setShowModal(true);
+        setShowModal(!showModal);
+    }
+
+     const loadMore = () => {
+         setPage(page + 1);
     }
 
     return (
@@ -75,8 +69,8 @@ export default function ImageFinder() {
             {status === 'pending' && <Loader/> }
             {status === 'rejected'  && <h1>{error.message}</h1>}
             <ImageGallery onImageClick={getImageUrl} serchImages={images} />
-            {images.length > 0 && <Button onClick={setPage(prevPage => prevPage + 1)} />}
-            {showModal && <Modal onClose={setShowModal(!showModal)} imageUrl={modalImg} />}
+            {images.length > 0 && <Button onClick={loadMore} />}
+            {showModal && <Modal onClose={setShowModal(!showModal)} imageUrl={modalImg}><img src={modalImg} alt={modalImg}/></Modal>}
         </div>
     );
 };
