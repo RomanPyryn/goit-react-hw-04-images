@@ -14,6 +14,7 @@ export default function ImageFinder() {
     const [page, setPage] = useState(1);
     const [showModal, setShowModal] = useState(false);
     const [modalImg, setModalImg] = useState('');
+    const [totalResults, setTotalResults] = useState(0);
     const [error, setError] = useState(null);
     const [status, setStatus] = useState('idle');
 
@@ -24,11 +25,13 @@ export default function ImageFinder() {
 
             try {
                 const results = await imageApi.fetchImage(request, page)
+                console.log(results.hits);
+                if (results.hits.length === 0) {toast.error('Write something else!');}
                 setImages(img => [...img, ...results.hits]);
+                setTotalResults(results.total);
                 setStatus('resolved')
             } catch (error) {
                 setError(error);
-                toast.error('Write something else!');
                 setStatus('rejected')
             }
         };
@@ -67,9 +70,9 @@ export default function ImageFinder() {
         <div>
             <Searchbar onSubmitFom={handleSubmit} />
             {status === 'pending' && <Loader/> }
-            {status === 'rejected'  && <h1>{error.message}</h1>}
+            {status === 'rejected' && <h1>{error.message}</h1>}
             <ImageGallery onImageClick={getImageUrl} serchImages={images} />
-            {images.length > 0 && <Button onClick={loadMore} />}
+            {images.length > 0 && totalResults !== images.length && <Button onClick={loadMore} />}
             {showModal && <Modal onClose={toggleModal}><img src={modalImg} alt={modalImg}/></Modal>}
         </div>
     );
