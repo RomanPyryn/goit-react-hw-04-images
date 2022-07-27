@@ -24,8 +24,7 @@ export default function ImageFinder() {
 
             try {
                 const results = await imageApi.fetchImage(request, page)
-                console.log(results.hits)
-                setImages([...images, ...results.hits]);
+                setImages(img => [...img, ...results.hits]);
                 setStatus('resolved')
             } catch (error) {
                 setError(error);
@@ -34,8 +33,7 @@ export default function ImageFinder() {
             }
         };
         
-        if (request !== '') {fetchFunc(request, page);}       
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        if (request !== '') {fetchFunc(request, page);}
     }, [page, request]);
     
 
@@ -50,12 +48,9 @@ export default function ImageFinder() {
         setRequest(formRequest);
         setPage(1);
         setImages([]);
-
-        e.currentTarget.reset();
     };
 
     const toggleModal = () => {
-        console.log('Toggle');
         setShowModal(!showModal);
     };
 

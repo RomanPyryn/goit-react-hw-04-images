@@ -7,17 +7,17 @@ const modalRoot = document.querySelector('#modal-root');
 
 const Modal = ({ onClose, children }) => {
   useEffect(() => {
+     const handleKeydown = e => {
+      if (e.code === 'Escape') {
+        onClose();
+      }
+     };
+    
     window.addEventListener('keydown', handleKeydown);
     return () => {
       window.removeEventListener('keydown', handleKeydown);
     };
-  });
-
-  const handleKeydown = e => {
-    if (e.code === 'Escape') {
-      onClose();
-    }
-  };
+  }, [onClose]);
 
   const handleOverlayClick = e => {
     if (e.target === e.currentTarget) {
@@ -32,7 +32,8 @@ const Modal = ({ onClose, children }) => {
 };
 
 Modal.propTypes = {
-  onClose: PropTypes.func,
+  onClose: PropTypes.func.isRequired,
+  children: PropTypes.object.isRequired,
 };
 
 export default Modal;

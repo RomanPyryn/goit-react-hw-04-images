@@ -1,18 +1,20 @@
 import PropTypes from 'prop-types';
 import { ImageGalleryItemBox, ImageGalleryItemLi, ImageGalleryItemImage } from './ImageGalleryItem.styled';
 
-const ImageGalleryItem = ({ serchImages, onImageClick }) => {
+const ImageGalleryItem = ({ imgName, imgSrc, imgAlt,  onImageClick }) => {
     return (
         <ImageGalleryItemBox>
-            {serchImages.map(serchImage => (<ImageGalleryItemLi key={serchImage.id}>
-                <ImageGalleryItemImage onClick={onImageClick} name={serchImage.largeImageURL} src={serchImage.webformatURL} alt={serchImage.tags} />
-                </ImageGalleryItemLi>))}
+            <ImageGalleryItemLi>
+            <ImageGalleryItemImage onClick={onImageClick} name={imgName} src={imgSrc} alt={imgAlt} />
+            </ImageGalleryItemLi>
         </ImageGalleryItemBox>
     )
 };
 
 ImageGalleryItem.protoTypes = {
-    serchImages: PropTypes.array.isRequired,
+    imgName: PropTypes.string.isRequired,
+    imgSrc: PropTypes.string.isRequired,
+    imgAlt: PropTypes.string.isRequired,
     onImageClick: PropTypes.func.isRequired,
 };
 
